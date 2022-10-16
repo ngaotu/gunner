@@ -1,13 +1,18 @@
 import random
 import pygame,sys
 import os
-
+import csv
 pygame.init()
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 GRAVITY = 0.5
-#KICH THUOC CUA 1 O TRONG BAN DO
-TILE_SIZE = 40
+# so hang so cot cua map
+ROWS = 16
+COLS = 150
+# kich thuoc cua 1 o
+TILE_SIZE = SCREEN_HEIGHT//ROWS
+TILE_TYPE = 20
+levels =1
 # Font 
 font = pygame.font.SysFont('Futura',25)
 # khoi tao cua so tro choi
@@ -22,8 +27,18 @@ screen_scroll = 0
 bg_scroll = 0
 #bullet
 
+# map _ img
+img_list = []
+for x in range(TILE_TYPE):
+    img = pygame.image.load(f"D:/Workspace/game/img/tile/{x}.png").convert_alpha()
+    img = pygame.transform.scale(img,(TILE_SIZE,TILE_SIZE))
+    img_list.append(img)
+
+
 # bullet_img = pygame.transform.scale(bullet_img,(bullet_img.get_width()*2.5,bullet_img.get_height()*0.5))
 bullet_img = pygame.image.load('img/icons/bullet.png').convert_alpha()
+
+
 #pick up item
 health_box_img = pygame.image.load("D:/Workspace/game/img/icons/health_box.png").convert_alpha()
 ammo_box_img = pygame.image.load("D:/Workspace/game/img/icons/ammo_box.png").convert_alpha()
@@ -32,6 +47,7 @@ items_box = {
     'Health' : health_box_img,
     'Ammo'  : ammo_box_img
 }
+# background 
 heart_img = pygame.image.load('D:/Workspace/game/img/icons/heart.png').convert_alpha()
 pine1_img = pygame.image.load('D:/Workspace/game/img/Background/pine1.png').convert_alpha()
 pine2_img = pygame.image.load('D:/Workspace/game/img/Background/pine2.png').convert_alpha()
@@ -161,12 +177,12 @@ class Soldier(pygame.sprite.Sprite):
     def shoot(self):
         if self.shoot_cooldown ==0:
             self.shoot_cooldown=15
-            bullets = Bullet(self.rect.centerx+(30*self.direction),self.rect.centery,self.direction)
+            bullets = Bullet(self.rect.centerx+(30*self.direction),self.rect.centery,self.direction,10)
             bullet_group.add(bullets)
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self,x,y,direction):
+    def __init__(self,x,y,direction,speed):
         pygame.sprite.Sprite.__init__(self)
-        self.speed = 10
+        self.speed = speed
         self.image = bullet_img
         self.rect = self.image.get_rect()
         self.rect.center = (x,y)
@@ -205,11 +221,11 @@ class Enemy(Soldier):
         self.move_counter = 0
         self.idle = False
         self.idle_counter  = 0
-        self.vision = pygame.Rect(0,0,150,20)
+        self.vision = pygame.Rect(0,0,200,20)
     def shoot(self):
         if self.shoot_cooldown ==0:
             self.shoot_cooldown=50
-            bullets = Bullet(self.rect.centerx+(0.75 * self.rect.size[0] * self.direction),self.rect.centery,self.direction)
+            bullets = Bullet(self.rect.centerx+(0.75 * self.rect.size[0] * self.direction),self.rect.centery,self.direction,5)
             bullet_group.add(bullets)
         # cai dat phuong thuc di chuyen cua ai
     def automatic(self,player1):
@@ -242,26 +258,102 @@ class Enemy(Soldier):
                     self.idle =False
         else:
             self.update_action(3)
-player1 = Soldier(200,400,'player',1.5,3)
-enemy1 = Enemy(400,300)
-enemy2 = Enemy(100,300)
-enemy3 = Enemy(500,300)
+class Decoration(pygame.sprite.Sprite):
+    def __init__(self,x,y,img):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.midtop = (x + TILE_SIZE//2,y + (TILE_SIZE- self.image.get_height()))
+class Water(pygame.sprite.Sprite):
+    def __init__(self,x,y,img):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.midtop = (x + TILE_SIZE//2,y + (TILE_SIZE- self.image.get_height()))
+class Exit_level(pygame.sprite.Sprite):
+    def __init__(self,x,y,img):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.midtop = (x + TILE_SIZE//2,y + (TILE_SIZE- self.image.get_height()))
+class Map():
+    def __init__(self):
+        self.obstacle_lits = []
+    def load_data(self,data):
+        for y,row in enumerate(data):
+            for x,tile in enumerate(row):
+                if tile>=0:
+                    img = img_list[tile]
+                    img_rect = img.get_rect()
+                    img_rect.x = x*TILE_SIZE
+                    img_rect.y = y*TILE_SIZE
+                    tile_data = (img,img_rect)
+                    #ground
+                if 0<= tile <=8:
+                    self.obstacle_lits.append(tile_data)
+                    #water
+                elif 9<=tile<=10:
+                    water = Water(x*TILE_SIZE,y*TILE_SIZE,img)
+                    water_group.add(water)
+                    #decorate
+                elif 11<=tile<=14:
+                    decorate = Decoration(x*TILE_SIZE,y*TILE_SIZE,img)
+                    decoration_group.add(decorate)
+                #player
+                elif tile ==15:
+                    player1 = Soldier(x*TILE_SIZE,y*TILE_SIZE,'player',1.5,3)
+                #enemy
+                elif tile ==16:
+                    enemy = Enemy(x*TILE_SIZE,y*TILE_SIZE)
+                    enemy_group.add(enemy)
+                #item box
+                elif tile ==17:
+                    item_box = ItemBox(x*TILE_SIZE,y*TILE_SIZE,'Ammo')
+                    items_box_group.add(item_box)
+                elif tile ==18:
+                    item_box = ItemBox(x*TILE_SIZE,y*TILE_SIZE,'Health')
+                    items_box_group.add(item_box)
+                elif tile ==19:
+                    exit_level = Exit_level(x*TILE_SIZE,y*TILE_SIZE,img)
+                    exit_group.add(exit_level)
+        return player1
+    def draw(self):
+        for tile in self.obstacle_lits:
+            screen.blit(tile[0],tile[1])
+        
+
 bullet_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
-
 items_box_group = pygame.sprite.Group()
+decoration_group = pygame.sprite.Group()
+water_group = pygame.sprite.Group()
+exit_group = pygame.sprite.Group()
 item_box = ItemBox(200,300,'Health')
 items_box_group.add(item_box)
-item_box = ItemBox(300,200,'Ammo')
-items_box_group.add(item_box)
-enemy_group.add(enemy1)
-enemy_group.add(enemy2)
-enemy_group.add(enemy3)
+
+
 # bg =pygame.image.load('D:/Workspace/game/img/background/mountain.png')
 # rect_bg =  bg.get_rect()
 # rect_bg.center =((0,0))
+
+# TAO BAN DO
+# khoi tao ban do rong
+map_data = []
+for row in range(ROWS):
+    r =[-1]*COLS
+    map_data.append(r)
+# them du lieu vao ban do
+with open(f"D:/Workspace/game/level{levels}_data.csv",newline='') as f:
+    reader = csv.reader(f,delimiter=',')
+    for x,row in enumerate(reader):
+        for y,tile in enumerate(row):
+            map_data[x][y] = int(tile)
+new_map = Map()
+player1 =new_map.load_data(map_data)
+print(map_data)
 while run:
     draw_bg()
+    new_map.draw()
     draw_charecter(f': {player1.health}',font,BLACK,4,4)
     player1.update()
     player1.display()
@@ -273,8 +365,14 @@ while run:
     #hien thi tat ca dan
     bullet_group.update()
     items_box_group.update() 
+    decoration_group.update() 
+    water_group.update() 
+    exit_group.update() 
     bullet_group.draw(screen)
     items_box_group.draw(screen)
+    decoration_group.draw(screen) 
+    water_group.draw(screen)
+    exit_group.draw(screen)  
     if player1.alive:
         if shoot:
             player1.shoot()
@@ -285,7 +383,8 @@ while run:
         else:
             player1.update_action(0)
         player1.moving(move_left,move_right)
-    
+    else:
+        pass
     
     for event in pygame.event.get():
         #quit game
