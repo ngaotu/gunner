@@ -1,9 +1,10 @@
 
 import random
-
+from pygame import mixer
 import pygame,sys
 import os
 import csv
+mixer.init()
 pygame.init()
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
@@ -18,6 +19,7 @@ TILE_TYPE = 21
 MAX_LEVEL =2
 levels =1
 total_diamon = 0
+music = 0
 # Font 
 font = pygame.font.SysFont('Futura',25)
 # khoi tao cua so tro choi
@@ -31,7 +33,19 @@ move_right = False
 shoot = False
 screen_scroll = 0
 bg_scroll = 0
-#bullet
+
+# music
+pygame.mixer.music.load('D:/Workspace/game/audio/music2.mp3')
+pygame.mixer.music.set_volume(0.3)
+pygame.mixer.music.play(-1,0.0,1000)
+jump_fx = pygame.mixer.Sound('D:/Workspace/game/audio/jump.wav')
+jump_fx.set_volume(0.5)
+shoot_fx = pygame.mixer.Sound('D:/Workspace/game/audio/shoot.wav')
+shoot_fx.set_volume(1.5)
+collect_fx = pygame.mixer.Sound('D:/Workspace/game/audio/collect.wav')
+death_fx = pygame.mixer.Sound('D:/Workspace/game/audio/die.wav')
+low_health_fx = pygame.mixer.Sound('D:/Workspace/game/audio/heart_injure.wav')
+low_health_fx.set_volume(0.2)
 
 # map _ img
 img_list = []
@@ -42,7 +56,7 @@ for x in range(TILE_TYPE):
 
 
 # bullet_img = pygame.transform.scale(bullet_img,(bullet_img.get_width()*2.5,bullet_img.get_height()*0.5))
-bullet_img = pygame.image.load('img/icons/bullet.png').convert_alpha()
+bullet_img = pygame.image.load('D:/Workspace/game/img/icons/bullet.png').convert_alpha()
 
 
 #pick up item
@@ -62,10 +76,10 @@ mountain_img = pygame.image.load('D:/Workspace/game/img/Background/mountain.png'
 sky_img = pygame.image.load('D:/Workspace/game/img/Background/sky_cloud.png').convert_alpha()
 start_img = pygame.image.load("D:/Workspace/game/img//start_btn.png").convert_alpha()
 restart_img = pygame.image.load("D:/Workspace/game/img//restart_btn.png").convert_alpha()
-exit_img = pygame.image.load("D:/Workspace/game/img//exit_btn.png").convert_alpha()
+exit_img = pygame.image.load("D:/Workspace/game/img/exit_btn.png").convert_alpha()
 BG = (144, 201, 120)
 RED = (255,0,0)
-BLACK = (252,252,255)
+WHITE = (252,252,255)
 
 
 def draw_bg():
@@ -142,7 +156,6 @@ class Soldier(pygame.sprite.Sprite):
         self.height = self.image.get_height()
     def display(self):
         screen.blit(pygame.transform.flip(self.image,self.flip,False),self.rect)
-        pygame.draw.rect(screen,(155,155,155),self,1)
     def moving(self,move_left,move_right):
         dx = 0
         dy = 0
@@ -184,10 +197,9 @@ class Soldier(pygame.sprite.Sprite):
                 else:
                     self.v = 0
                     dy = tile[1].bottom - self.rect.top
-     
+
         if self.rect.top > SCREEN_HEIGHT:
             self.health = 0
-
         self.rect.x += dx
         self.rect.y += dy
         if self.type =='player':
@@ -220,12 +232,18 @@ class Soldier(pygame.sprite.Sprite):
             self.index = 0
             self.update_time = pygame.time.get_ticks()
     def check_alive(self):
+        if self.type =='player':
+            if 0<self.health <=50:
+                low_health_fx.play()
+            else:
+                low_health_fx.stop()
         if self.health <=0:
             self.health =0
             self.disappear-=1
             self.speed = 0
             self.alive =False
             self.update_action(3)
+                
     def update(self):
         self.update_animation()
         self.check_alive()
@@ -237,6 +255,7 @@ class Soldier(pygame.sprite.Sprite):
             self.shoot_cooldown=15
             bullets = Bullet(self.rect.centerx+(29*self.direction),self.rect.centery,self.direction,10)
             bullet_group.add(bullets)
+            shoot_fx.play()
 class Bullet(pygame.sprite.Sprite):
     def __init__(self,x,y,direction,speed):
         pygame.sprite.Sprite.__init__(self)
@@ -277,6 +296,7 @@ class ItemBox(pygame.sprite.Sprite):
                 player1.health =min(player1.health+50,player1.max_health)
             if self.it_type =='Ammo':
                 pass
+            collect_fx.play()
             self.kill()
 class Enemy(Soldier):
     def __init__(self, pos_x, pos_y):
@@ -301,10 +321,11 @@ class Enemy(Soldier):
         return super().moving(move_left, move_right)
     def automatic(self,player1):
         if self.alive and player1.alive:
-            if random.randint(1,300) ==1:
+            if self.idle == False and random.randint(1,300) ==1:
                 self.idle =True
                 self.update_action(0)
                 self.idle_counter = 100
+                # dung yen ban
             if self.vision.colliderect(player1.rect):
                 self.idle =True
                 self.update_action(0)
@@ -327,8 +348,8 @@ class Enemy(Soldier):
                 self.idle_counter -=1
                 if self.idle_counter <=0:
                     self.idle =False
-        else:
-            self.update_action(3)
+        elif player1.alive ==False:
+            self.update_action(0)
         self.rect.x +=screen_scroll
          
 class Decoration(pygame.sprite.Sprite):
@@ -348,6 +369,10 @@ class Water(pygame.sprite.Sprite):
     def update(self):
         self.rect.x +=screen_scroll
         if self.rect.colliderect(player1.rect.x,player1.rect.y -player1.width//2,player1.width,player1.height):
+            # music = 0
+            # if music ==0:
+            #     jump_water_fx.play()
+            #     music +=1
             player1.health = 0
             
 class Exit_level(pygame.sprite.Sprite):
@@ -416,6 +441,7 @@ class Diamons(pygame.sprite.Sprite):
         self.rect.x +=screen_scroll 
         if self.rect.colliderect(player1.rect):
             player1.diamon+=1
+            collect_fx.play()
             self.kill()
 
 class Button():
@@ -463,6 +489,9 @@ player1 =new_map.load_data(map_data)
 while run:
     if start_game==False:
         draw_bg()
+        screen.blit(diamon_display_img,(0,0))
+        all_diamon = font.render(f': {total_diamon}',True,WHITE)
+        screen.blit(all_diamon,(diamon_display_img.get_width()+4,4))
         if start_btn.draw(screen):
             start_game =True
         if exit_btn.draw(screen):
@@ -470,7 +499,7 @@ while run:
     else:
         draw_bg()
         new_map.draw()
-        draw_charecter(f': {player1.health}',f': {player1.diamon}',font,BLACK,4,4)
+        draw_charecter(f': {player1.health}',f': {player1.diamon}',font,WHITE,4,4)
         player1.update()
         player1.display()
         for enemy in enemy_group:
@@ -501,7 +530,6 @@ while run:
             else:
                 player1.update_action(0)
             screen_scroll,level_complete=player1.moving(move_left,move_right)
-            print(total_diamon)
             bg_scroll -=screen_scroll
             if level_complete:
                 screen_scroll = 0
@@ -529,6 +557,10 @@ while run:
                     new_map = Map()
                     player1 =new_map.load_data(map_data)
         else:
+            # âm thanh người chơi chết chỉ phát 1 lần
+            if music ==0:
+                death_fx.play()
+                music+=1
             screen_scroll =0
             if restart_btn.draw(screen):
                 bg_scroll =0
@@ -557,6 +589,7 @@ while run:
                 move_right = True
             if event.key == pygame.K_SPACE:
                 player1.jump = True
+                jump_fx.play()
             if event.key == pygame.K_ESCAPE:
                 run = False
         if event.type ==pygame.KEYUP:
