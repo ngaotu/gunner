@@ -15,8 +15,8 @@ ROWS = 16
 COLS = 150
 # kich thuoc cua 1 o
 TILE_SIZE = SCREEN_HEIGHT//ROWS
-TILE_TYPE = 22
-MAX_LEVEL =2
+TILE_TYPE = 23
+MAX_LEVEL =3
 levels =1
 total_diamon = 0
 music = 0
@@ -97,6 +97,9 @@ def snow_animation():
             #y is negative as we wanna start from top again and increase y
             snow[ice][1] = random.randrange(-60,-10)
             snow[ice][0] = random.randrange(0,int(7.5*SCREEN_WIDTH))
+
+
+
 def draw_bg():
     screen.fill(BG)
     width = sky_img.get_width()
@@ -335,7 +338,7 @@ class Enemy(Soldier):
             if tile[1].colliderect(self.rect.x+dx,self.rect.y,self.width,self.height):
                 self.direction*=-1
         return super().moving(move_left, move_right)
-    def automatic(self,player1):
+    def automatic(self):
         if self.alive and player1.alive:
             if self.idle == False and random.randint(1,300) ==1:
                 self.idle =True
@@ -367,7 +370,7 @@ class Enemy(Soldier):
         elif player1.alive ==False:
             self.update_action(0)
         self.rect.x +=screen_scroll
-         
+
 class Decoration(pygame.sprite.Sprite):
     def __init__(self,x,y,img):
         pygame.sprite.Sprite.__init__(self)
@@ -419,8 +422,8 @@ class Map():
                     water = Water(x*TILE_SIZE,y*TILE_SIZE,img)
                     water_group.add(water)
                     #decorate
-                elif 11<=tile<=14 or tile ==21:
-                    if tile ==11 or tile ==12:
+                elif 11<=tile<=14 or tile ==22:
+                    if tile ==11 or tile ==12 or tile ==22:
                         img = pygame.transform.scale(img,(img.get_width()*2,img.get_height()*2))
                     if tile ==21:
                         img = pygame.transform.scale(img,(img.get_width()*2,img.get_height()*3))
@@ -434,13 +437,10 @@ class Map():
                     enemy = Enemy(x*TILE_SIZE,y*TILE_SIZE)
                     enemy_group.add(enemy)
                 #item box
-                elif tile ==17:
-                    item_box = ItemBox(x*TILE_SIZE,y*TILE_SIZE,'Ammo')
-                    items_box_group.add(item_box)
                 elif tile ==18:
                     item_box = ItemBox(x*TILE_SIZE,y*TILE_SIZE,'Health')
                     items_box_group.add(item_box)
-                elif tile ==19:
+                elif tile ==19 or tile ==17:
                     exit_level = Exit_level(x*TILE_SIZE,y*TILE_SIZE,img)
                     exit_group.add(exit_level)
                 elif tile ==20:
@@ -524,7 +524,7 @@ while run:
         player1.update()
         player1.display()
         for enemy in enemy_group:
-            enemy.automatic(player1)
+            enemy.automatic()
             enemy.update()
             if enemy.disappear>0:
                 enemy.display()
