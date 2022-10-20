@@ -15,7 +15,7 @@ ROWS = 16
 COLS = 150
 # kich thuoc cua 1 o
 TILE_SIZE = SCREEN_HEIGHT//ROWS
-TILE_TYPE = 21
+TILE_TYPE = 22
 MAX_LEVEL =2
 levels =1
 total_diamon = 0
@@ -76,20 +76,36 @@ mountain_img = pygame.image.load('D:/Workspace/game/img/Background/mountain.png'
 sky_img = pygame.image.load('D:/Workspace/game/img/Background/sky_cloud.png').convert_alpha()
 start_img = pygame.image.load("D:/Workspace/game/img//start_btn.png").convert_alpha()
 restart_img = pygame.image.load("D:/Workspace/game/img//restart_btn.png").convert_alpha()
+# game_over_img = pygame.image.load("D:/Workspace/game/img/game_over.png").convert_alpha()
 exit_img = pygame.image.load("D:/Workspace/game/img/exit_btn.png").convert_alpha()
 BG = (144, 201, 120)
 RED = (255,0,0)
 WHITE = (252,252,255)
 
-
+# create snow fall animation
+snow = []
+for i in range(200):
+    x = random.randrange(0,int(SCREEN_WIDTH*7.5))
+    y = random.randrange(0,SCREEN_HEIGHT)
+    snow.append([x,y])
+def snow_animation():
+    for ice in range(len(snow)): 
+        pygame.draw.circle(screen, 'white',(snow[ice][0]-bg_scroll*0.6,snow[ice][1]),2)
+        #we are increasing the y coordinate by one as we want the fall effect 
+        snow[ice][1]+=1 
+        if snow[ice][1]>SCREEN_HEIGHT:  
+            #y is negative as we wanna start from top again and increase y
+            snow[ice][1] = random.randrange(-60,-10)
+            snow[ice][0] = random.randrange(0,int(7.5*SCREEN_WIDTH))
 def draw_bg():
-	screen.fill(BG)
-	width = sky_img.get_width()
-	for x in range(5):
-		screen.blit(sky_img, ((x * width) - bg_scroll * 0.5, 0))
-		screen.blit(mountain_img, ((x * width) - bg_scroll * 0.6, SCREEN_HEIGHT - mountain_img.get_height() - 300))
-		screen.blit(pine1_img, ((x * width) - bg_scroll * 0.7, SCREEN_HEIGHT - pine1_img.get_height() - 150))
-		screen.blit(pine2_img, ((x * width) - bg_scroll * 0.8, SCREEN_HEIGHT - pine2_img.get_height())) 
+    screen.fill(BG)
+    width = sky_img.get_width()
+    for x in range(5):
+        # snow_animation()
+        screen.blit(sky_img, ((x * width) - bg_scroll * 0.5, 0))
+        screen.blit(mountain_img, ((x * width) - bg_scroll * 0.6, SCREEN_HEIGHT - mountain_img.get_height() - 300))
+        screen.blit(pine1_img, ((x * width) - bg_scroll * 0.7, SCREEN_HEIGHT - pine1_img.get_height() - 150))
+        screen.blit(pine2_img, ((x * width) - bg_scroll * 0.8, SCREEN_HEIGHT - pine2_img.get_height())) 
 def draw_charecter(text1,text2,font,text_col,x,y):
     heart = font.render(text1,True,text_col)
     diamon = font.render(text2,True,text_col)
@@ -277,7 +293,7 @@ class Bullet(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(player1,bullet_group,False):
             if player1.alive:
                 self.kill()
-                player1.health-=5
+                player1.health-=10
         for tile in  new_map.obstacle_lits:
             #kiem tra va cham theo chieu ngang
             if tile[1].colliderect(self.rect):
@@ -396,14 +412,18 @@ class Map():
                     img_rect.y = y*TILE_SIZE
                     tile_data = (img,img_rect)
                     #ground
-                if 0<= tile <=8 or tile ==12:
+                if 0<= tile <=8:
                     self.obstacle_lits.append(tile_data)
                     #water
                 elif 9<=tile<=10:
                     water = Water(x*TILE_SIZE,y*TILE_SIZE,img)
                     water_group.add(water)
                     #decorate
-                elif 11<=tile<=14 and tile != 12:
+                elif 11<=tile<=14 or tile ==21:
+                    if tile ==11 or tile ==12:
+                        img = pygame.transform.scale(img,(img.get_width()*2,img.get_height()*2))
+                    if tile ==21:
+                        img = pygame.transform.scale(img,(img.get_width()*2,img.get_height()*3))
                     decorate = Decoration(x*TILE_SIZE,y*TILE_SIZE,img)
                     decoration_group.add(decorate)
                 #player
@@ -498,6 +518,7 @@ while run:
             run = False
     else:
         draw_bg()
+        snow_animation()
         new_map.draw()
         draw_charecter(f': {player1.health}',f': {player1.diamon}',font,WHITE,4,4)
         player1.update()
