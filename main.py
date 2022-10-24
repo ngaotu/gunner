@@ -35,49 +35,49 @@ screen_scroll = 0
 bg_scroll = 0
 
 # music
-pygame.mixer.music.load('game/audio/music2.mp3')
+pygame.mixer.music.load('gunner/audio/music2.mp3')
 pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1,0.0,1000)
-jump_fx = pygame.mixer.Sound('game/audio/jump.wav')
+jump_fx = pygame.mixer.Sound('gunner/audio/jump.wav')
 jump_fx.set_volume(0.5)
-shoot_fx = pygame.mixer.Sound('game/audio/shoot.wav')
+shoot_fx = pygame.mixer.Sound('gunner/audio/shoot.wav')
 shoot_fx.set_volume(1.5)
-collect_fx = pygame.mixer.Sound('game/audio/collect.wav')
-death_fx = pygame.mixer.Sound('game/audio/die.wav')
-low_health_fx = pygame.mixer.Sound('game/audio/heart_injure.wav')
+collect_fx = pygame.mixer.Sound('gunner/audio/collect.wav')
+death_fx = pygame.mixer.Sound('gunner/audio/die.wav')
+low_health_fx = pygame.mixer.Sound('gunner/audio/heart_injure.wav')
 low_health_fx.set_volume(0.2)
 
 # map _ img
 img_list = []
 for x in range(TILE_TYPE):
-    img = pygame.image.load(f"game/img/tile/{x}.png").convert_alpha()
+    img = pygame.image.load(f"gunner/img/tile/{x}.png").convert_alpha()
     img = pygame.transform.scale(img,(TILE_SIZE,TILE_SIZE))
     img_list.append(img)
 
 
 # bullet_img = pygame.transform.scale(bullet_img,(bullet_img.get_width()*2.5,bullet_img.get_height()*0.5))
-bullet_img = pygame.image.load('game/img/icons/bullet.png').convert_alpha()
+bullet_img = pygame.image.load('gunner/img/icons/bullet.png').convert_alpha()
 
 
 #pick up item
-health_box_img = pygame.image.load("game/img/icons/health_box.png").convert_alpha()
-ammo_box_img = pygame.image.load("game/img/icons/ammo_box.png").convert_alpha()
+health_box_img = pygame.image.load("gunner/img/icons/health_box.png").convert_alpha()
+ammo_box_img = pygame.image.load("gunner/img/icons/ammo_box.png").convert_alpha()
 
 items_box = {
     'Health' : health_box_img,
     'Ammo'  : ammo_box_img
 }
 # background 
-diamon_display_img = pygame.image.load('game/img/diamon.png').convert_alpha()
-heart_img = pygame.image.load('game/img/icons/heart.png').convert_alpha()
-pine1_img = pygame.image.load('game/img/Background/pine1.png').convert_alpha()
-pine2_img = pygame.image.load('game/img/Background/pine2.png').convert_alpha()
-mountain_img = pygame.image.load('game/img/Background/mountain.png').convert_alpha()
-sky_img = pygame.image.load('game/img/Background/sky_cloud.png').convert_alpha()
-start_img = pygame.image.load("game/img//start_btn.png").convert_alpha()
-restart_img = pygame.image.load("game/img//restart_btn.png").convert_alpha()
-# game_over_img = pygame.image.load("game/img/game_over.png").convert_alpha()
-exit_img = pygame.image.load("game/img/exit_btn.png").convert_alpha()
+diamon_display_img = pygame.image.load('gunner/img/diamon.png').convert_alpha()
+heart_img = pygame.image.load('gunner/img/icons/heart.png').convert_alpha()
+pine1_img = pygame.image.load('gunner/img/Background/pine1.png').convert_alpha()
+pine2_img = pygame.image.load('gunner/img/Background/pine2.png').convert_alpha()
+mountain_img = pygame.image.load('gunner/img/Background/mountain.png').convert_alpha()
+sky_img = pygame.image.load('gunner/img/Background/sky_cloud.png').convert_alpha()
+start_img = pygame.image.load("gunner/img//start_btn.png").convert_alpha()
+restart_img = pygame.image.load("gunner/img//restart_btn.png").convert_alpha()
+# game_over_img = pygame.image.load("gunner/img/game_over.png").convert_alpha()
+exit_img = pygame.image.load("gunner/img/exit_btn.png").convert_alpha()
 BG = (144, 201, 120)
 RED = (255,0,0)
 WHITE = (252,252,255)
@@ -162,9 +162,9 @@ class Soldier(pygame.sprite.Sprite):
 			#reset temporary list of images
             temp_list = []
 			#count number of files in the folder
-            num_of_frames = len(os.listdir(f'game/img/{self.type}/{animation}'))
+            num_of_frames = len(os.listdir(f'gunner/img/{self.type}/{animation}'))
             for i in range(0,num_of_frames):
-                img = pygame.image.load(f'game/img/{self.type}/{animation}/{i}.png').convert_alpha()
+                img = pygame.image.load(f'gunner/img/{self.type}/{animation}/{i}.png').convert_alpha()
                 img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
                 temp_list.append(img)
             self.animation_list.append(temp_list)
@@ -498,7 +498,7 @@ exit_btn = Button(exit_img,SCREEN_WIDTH//2-200+start_img.get_width(),SCREEN_HEIG
 
 # TAO BAN DO
 map_data = reset_level()
-with open(f"game/level{levels}_data.csv",newline='') as f:
+with open(f"gunner/level{levels}_data.csv",newline='') as f:
                     reader = csv.reader(f,delimiter=',')
                     for x,row in enumerate(reader):
                         for y,tile in enumerate(row):
@@ -558,7 +558,7 @@ while run:
                 if levels<=MAX_LEVEL:
                     bg_scroll =0
                     map_data = reset_level()
-                    with open(f"game/level{levels}_data.csv",newline='') as f:
+                    with open(f"gunner/level{levels}_data.csv",newline='') as f:
                         reader = csv.reader(f,delimiter=',')
                         for x,row in enumerate(reader):
                             for y,tile in enumerate(row):
@@ -570,7 +570,7 @@ while run:
                     levels = 1
                     bg_scroll =0
                     map_data = reset_level()
-                    with open(f"game/level{levels}_data.csv",newline='') as f:
+                    with open(f"gunner/level{levels}_data.csv",newline='') as f:
                         reader = csv.reader(f,delimiter=',')
                         for x,row in enumerate(reader):
                             for y,tile in enumerate(row):
@@ -586,7 +586,7 @@ while run:
             if restart_btn.draw(screen):
                 bg_scroll =0
                 map_data = reset_level()
-                with open(f"game/level{levels}_data.csv",newline='') as f:
+                with open(f"gunner/level{levels}_data.csv",newline='') as f:
                     reader = csv.reader(f,delimiter=',')
                     for x,row in enumerate(reader):
                         for y,tile in enumerate(row):
