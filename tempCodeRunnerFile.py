@@ -1,0 +1,1 @@
+start_img = pygame.transform.scale(start_img,(300,100))

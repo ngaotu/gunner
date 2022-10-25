@@ -17,9 +17,11 @@ COLS = 150
 TILE_SIZE = SCREEN_HEIGHT//ROWS
 TILE_TYPE = 23
 MAX_LEVEL =3
+
 levels =1
 total_diamon = 0
 music = 0
+# music_play = True
 # Font 
 font = pygame.font.SysFont('Futura',25)
 # khoi tao cua so tro choi
@@ -28,6 +30,9 @@ pygame.display.set_caption(" Super Shooter")
 clock = pygame.time.Clock() 
 run = True
 start_game =False
+# setting = False
+set_up = False
+# music_ = True
 move_left = False
 move_right = False
 shoot = False
@@ -35,13 +40,13 @@ screen_scroll = 0
 bg_scroll = 0
 
 # music
-pygame.mixer.music.load('gunner/audio/music2.mp3')
+pygame.mixer.music.load('gunner/audio/Pubg.mp3')
 pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1,0.0,1000)
 jump_fx = pygame.mixer.Sound('gunner/audio/jump.wav')
 jump_fx.set_volume(0.5)
-shoot_fx = pygame.mixer.Sound('gunner/audio/shoot.wav')
-shoot_fx.set_volume(1.5)
+shoot_fx = pygame.mixer.Sound('gunner/audio/ak.wav')
+shoot_fx.set_volume(0.2)
 collect_fx = pygame.mixer.Sound('gunner/audio/collect.wav')
 death_fx = pygame.mixer.Sound('gunner/audio/die.wav')
 low_health_fx = pygame.mixer.Sound('gunner/audio/heart_injure.wav')
@@ -54,30 +59,42 @@ for x in range(TILE_TYPE):
     img = pygame.transform.scale(img,(TILE_SIZE,TILE_SIZE))
     img_list.append(img)
 
-
+player_img = pygame.image.load('gunner/img/tile/15.png')
+player_img = pygame.transform.scale(player_img,(5*player_img.get_width(),5*player_img.get_height()))
 # bullet_img = pygame.transform.scale(bullet_img,(bullet_img.get_width()*2.5,bullet_img.get_height()*0.5))
 bullet_img = pygame.image.load('gunner/img/icons/bullet.png').convert_alpha()
 
 
 #pick up item
 health_box_img = pygame.image.load("gunner/img/icons/health_box.png").convert_alpha()
-ammo_box_img = pygame.image.load("gunner/img/icons/ammo_box.png").convert_alpha()
-
 items_box = {
-    'Health' : health_box_img,
-    'Ammo'  : ammo_box_img
+    'Health' : health_box_img
 }
 # background 
+background_settings = pygame.image.load('gunner/img/Background/1.jpg').convert_alpha()
+background_settings = pygame.transform.scale(background_settings, (SCREEN_WIDTH,SCREEN_HEIGHT))
+background_setup = pygame.image.load('gunner/img/Background/2.jpg').convert_alpha()
+background_setup = pygame.transform.scale(background_setup, (SCREEN_WIDTH,SCREEN_HEIGHT))
 diamon_display_img = pygame.image.load('gunner/img/diamon.png').convert_alpha()
 heart_img = pygame.image.load('gunner/img/icons/heart.png').convert_alpha()
 pine1_img = pygame.image.load('gunner/img/Background/pine1.png').convert_alpha()
 pine2_img = pygame.image.load('gunner/img/Background/pine2.png').convert_alpha()
 mountain_img = pygame.image.load('gunner/img/Background/mountain.png').convert_alpha()
-sky_img = pygame.image.load('gunner/img/Background/sky_cloud.png').convert_alpha()
+sky_img = pygame.image.load('gunner/img/Background/sky_cloud.png').convert_alpha() 
 start_img = pygame.image.load("gunner/img//start_btn.png").convert_alpha()
 restart_img = pygame.image.load("gunner/img//restart_btn.png").convert_alpha()
+resume_img = pygame.image.load("gunner/img/resume.jpg").convert_alpha()
+setting_img = pygame.image.load("gunner/img/setting_btn.png").convert_alpha()
+# start_img = pygame.transform.scale(start_img,(300,100))
+resume_img = pygame.transform.scale(resume_img,(300,100))
+setting_img = pygame.transform.scale(setting_img,(300,100))
 # game_over_img = pygame.image.load("gunner/img/game_over.png").convert_alpha()
 exit_img = pygame.image.load("gunner/img/exit_btn.png").convert_alpha()
+exit_img = pygame.transform.scale(exit_img,(300,100))
+# hinh map
+trungbui = pygame.image.load('gunner/img/background/map.jpg')
+trungbui = pygame.transform.scale(trungbui,(start_img.get_width(),trungbui.get_height()))
+
 BG = (144, 201, 120)
 RED = (255,0,0)
 WHITE = (252,252,255)
@@ -99,16 +116,18 @@ def snow_animation():
             snow[ice][0] = random.randrange(0,int(7.5*SCREEN_WIDTH))
 
 
-
 def draw_bg():
-    screen.fill(BG)
-    width = sky_img.get_width()
-    for x in range(5):
-        # snow_animation()
-        screen.blit(sky_img, ((x * width) - bg_scroll * 0.5, 0))
-        screen.blit(mountain_img, ((x * width) - bg_scroll * 0.6, SCREEN_HEIGHT - mountain_img.get_height() - 300))
-        screen.blit(pine1_img, ((x * width) - bg_scroll * 0.7, SCREEN_HEIGHT - pine1_img.get_height() - 150))
-        screen.blit(pine2_img, ((x * width) - bg_scroll * 0.8, SCREEN_HEIGHT - pine2_img.get_height())) 
+    if set_up == True:
+        screen.blit(background_setup,(0,0))
+    else:
+        screen.fill(BG)
+        width = sky_img.get_width()
+        for x in range(5):
+            # snow_animation()
+            screen.blit(sky_img, ((x * width) - bg_scroll * 0.5, 0))
+            screen.blit(mountain_img, ((x * width) - bg_scroll * 0.6, SCREEN_HEIGHT - mountain_img.get_height() - 300))
+            screen.blit(pine1_img, ((x * width) - bg_scroll * 0.7, SCREEN_HEIGHT - pine1_img.get_height() - 150))
+            screen.blit(pine2_img, ((x * width) - bg_scroll * 0.8, SCREEN_HEIGHT - pine2_img.get_height())) 
 def draw_charecter(text1,text2,font,text_col,x,y):
     heart = font.render(text1,True,text_col)
     diamon = font.render(text2,True,text_col)
@@ -129,6 +148,15 @@ def reset_level():
         r =[-1]*COLS
         map_data.append(r)
     return map_data
+def start_screen():
+    screen.blit(background_settings,(0,0))
+    screen.blit(diamon_display_img,(0,0))
+    screen.blit(trungbui,(start_btn.rect.x,start_btn.rect.y-trungbui.get_height()))
+    screen.blit(player_img,(SCREEN_WIDTH//2 +150,SCREEN_HEIGHT//2))
+    screen.blit(player_img,(SCREEN_WIDTH//2,SCREEN_HEIGHT//2+50))
+    screen.blit(pygame.transform.flip(player_img,True,False),(SCREEN_WIDTH//2-150,SCREEN_HEIGHT//2))
+    all_diamon = font.render(f': {total_diamon}',True,WHITE)
+    screen.blit(all_diamon,(diamon_display_img.get_width()+4,4))
 # khoi tao lop chien binh
 class Soldier(pygame.sprite.Sprite):
     def __init__(self, pos_x , pos_y,typeOf ,scale,speed):
@@ -313,8 +341,6 @@ class ItemBox(pygame.sprite.Sprite):
         if pygame.sprite.collide_rect(self,player1):
             if self.it_type =='Health':
                 player1.health =min(player1.health+50,player1.max_health)
-            if self.it_type =='Ammo':
-                pass
             collect_fx.play()
             self.kill()
 class Enemy(Soldier):
@@ -490,11 +516,11 @@ exit_group = pygame.sprite.Group()
 diamon_group = pygame.sprite.Group()
 
 #create button
-start_btn = Button(start_img,SCREEN_WIDTH//2-300,SCREEN_HEIGHT//2-150,1)
+start_btn = Button(start_img,20,SCREEN_HEIGHT-80,1)
 restart_btn = Button(restart_img,start_btn.rect.x+100,100,1)
-exit_btn = Button(exit_img,SCREEN_WIDTH//2-200+start_img.get_width(),SCREEN_HEIGHT//2-150,1)
-
-
+exit_btn = Button(exit_img,SCREEN_WIDTH//2-200,SCREEN_HEIGHT//2+150,1)
+resume_btn = Button(resume_img,SCREEN_WIDTH//2-200,SCREEN_HEIGHT//2-150,1)
+setting_btn = Button(setting_img,SCREEN_WIDTH//2-200,SCREEN_HEIGHT//2,1)
 
 # TAO BAN DO
 map_data = reset_level()
@@ -507,94 +533,104 @@ new_map = Map()
 player1 =new_map.load_data(map_data)
 
 while run:
-    if start_game==False:
-        draw_bg()
-        screen.blit(diamon_display_img,(0,0))
-        all_diamon = font.render(f': {total_diamon}',True,WHITE)
-        screen.blit(all_diamon,(diamon_display_img.get_width()+4,4))
-        if start_btn.draw(screen):
-            start_game =True
-        if exit_btn.draw(screen):
-            run = False
-    else:
-        draw_bg()
-        snow_animation()
-        new_map.draw()
-        draw_charecter(f': {player1.health}',f': {player1.diamon}',font,WHITE,4,4)
-        player1.update()
-        player1.display()
-        for enemy in enemy_group:
-            enemy.automatic()
-            enemy.update()
-            if enemy.disappear>0:
-                enemy.display()
-        #hien thi tat ca dan
-        bullet_group.update()
-        items_box_group.update()
-        diamon_group.update()
-        decoration_group.update() 
-        water_group.update() 
-        exit_group.update() 
-        bullet_group.draw(screen)
-        items_box_group.draw(screen)
-        diamon_group.draw(screen)
-        decoration_group.draw(screen) 
-        water_group.draw(screen)
-        exit_group.draw(screen)  
-        if player1.alive:
-            if shoot:
-                player1.shoot()
-            if player1.jump_limit:
-                player1.update_action(2)
-            elif move_left or move_right:
-                player1.update_action(1)
-            else:
-                player1.update_action(0)
-            screen_scroll,level_complete=player1.moving(move_left,move_right)
-            bg_scroll -=screen_scroll
-            if level_complete:
-                screen_scroll = 0
-                levels+=1
-                if levels<=MAX_LEVEL:
-                    bg_scroll =0
-                    map_data = reset_level()
-                    with open(f"gunner/level{levels}_data.csv",newline='') as f:
-                        reader = csv.reader(f,delimiter=',')
-                        for x,row in enumerate(reader):
-                            for y,tile in enumerate(row):
-                                map_data[x][y] = int(tile)
-                    new_map = Map()
-                    player1 =new_map.load_data(map_data)
-                if levels > MAX_LEVEL:
-                    start_game =False
-                    levels = 1
-                    bg_scroll =0
-                    map_data = reset_level()
-                    with open(f"gunner/level{levels}_data.csv",newline='') as f:
-                        reader = csv.reader(f,delimiter=',')
-                        for x,row in enumerate(reader):
-                            for y,tile in enumerate(row):
-                                map_data[x][y] = int(tile)
-                    new_map = Map()
-                    player1 =new_map.load_data(map_data)
-        else:
-            # âm thanh người chơi chết chỉ phát 1 lần
-            if music ==0:
-                death_fx.play()
-                music+=1
-            screen_scroll =0
-            if restart_btn.draw(screen):
-                bg_scroll =0
-                map_data = reset_level()
-                with open(f"gunner/level{levels}_data.csv",newline='') as f:
-                    reader = csv.reader(f,delimiter=',')
-                    for x,row in enumerate(reader):
-                        for y,tile in enumerate(row):
-                            map_data[x][y] = int(tile)
-                new_map = Map()
-                player1 =new_map.load_data(map_data)
+    if set_up == True:
+            pygame.mixer.music.set_volume(0)
+            draw_bg()
             if exit_btn.draw(screen):
-                run =False
+                run = False
+            if resume_btn.draw(screen):
+                set_up = False
+            if setting_btn.draw(screen):
+                pass
+    else:
+        pygame.mixer.music.set_volume(0.3)
+        if start_game==False:
+            start_screen()
+            if start_btn.draw(screen):
+                start_game =True
+            # if exit_btn.draw(screen):
+            #     run = False
+        else:
+            
+            draw_bg()
+            snow_animation()
+            new_map.draw()
+            draw_charecter(f': {player1.health}',f': {player1.diamon}',font,WHITE,4,4)
+            player1.update()
+            player1.display()
+            for enemy in enemy_group:
+                enemy.automatic()
+                enemy.update()
+                if enemy.disappear>0:
+                    enemy.display()
+            #hien thi tat ca dan
+            bullet_group.update()
+            items_box_group.update()
+            diamon_group.update()
+            decoration_group.update() 
+            water_group.update() 
+            exit_group.update() 
+            bullet_group.draw(screen)
+            items_box_group.draw(screen)
+            diamon_group.draw(screen)
+            decoration_group.draw(screen) 
+            water_group.draw(screen)
+            exit_group.draw(screen)  
+            if player1.alive:
+                if shoot:
+                    player1.shoot()
+                if player1.jump_limit:
+                    player1.update_action(2)
+                elif move_left or move_right:
+                    player1.update_action(1)
+                else:
+                    player1.update_action(0)
+                screen_scroll,level_complete=player1.moving(move_left,move_right)
+                bg_scroll -=screen_scroll
+                if level_complete:
+                    screen_scroll = 0
+                    levels+=1
+                    if levels<=MAX_LEVEL:
+                        bg_scroll =0
+                        map_data = reset_level()
+                        with open(f"gunner/level{levels}_data.csv",newline='') as f:
+                            reader = csv.reader(f,delimiter=',')
+                            for x,row in enumerate(reader):
+                                for y,tile in enumerate(row):
+                                    map_data[x][y] = int(tile)
+                        new_map = Map()
+                        player1 =new_map.load_data(map_data)
+                    if levels > MAX_LEVEL:
+                        start_game =False
+                        levels = 1
+                        bg_scroll =0
+                        map_data = reset_level()
+                        with open(f"gunner/level{levels}_data.csv",newline='') as f:
+                            reader = csv.reader(f,delimiter=',')
+                            for x,row in enumerate(reader):
+                                for y,tile in enumerate(row):
+                                    map_data[x][y] = int(tile)
+                        new_map = Map()
+                        player1 =new_map.load_data(map_data)
+            else:
+                # âm thanh người chơi chết chỉ phát 1 lần
+                if music ==0:
+                    death_fx.play()
+                    music+=1
+                screen_scroll =0
+                if restart_btn.draw(screen):
+                    bg_scroll =0
+                    map_data = reset_level()
+                    with open(f"gunner/level{levels}_data.csv",newline='') as f:
+                        reader = csv.reader(f,delimiter=',')
+                        for x,row in enumerate(reader):
+                            for y,tile in enumerate(row):
+                                map_data[x][y] = int(tile)
+                    new_map = Map()
+                    player1 =new_map.load_data(map_data)
+                if exit_btn.draw(screen):
+                    run =False
+
     for event in pygame.event.get():
         #quit game
         if event.type == pygame.QUIT:
@@ -612,7 +648,8 @@ while run:
                 player1.jump = True
                 jump_fx.play()
             if event.key == pygame.K_ESCAPE:
-                run = False
+                # run = False
+                set_up = True
         if event.type ==pygame.KEYUP:
             if event.key == pygame.K_a:
                 move_left = False
