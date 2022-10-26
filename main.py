@@ -30,7 +30,9 @@ pygame.display.set_caption(" Super Shooter")
 clock = pygame.time.Clock() 
 run = True
 start_game =False
-# setting = False
+setting = False
+general_setting = True
+control_setting = False
 set_up = False
 # music_ = True
 move_left = False   
@@ -71,10 +73,16 @@ items_box = {
     'Health' : health_box_img
 }
 you_win_img = pygame.image.load('gunner/img/win.png').convert_alpha()
-you_win_img = pygame.transform.scale(you_win_img,(you_win_img.get_width(),you_win_img.get_height()))
+# you_win_img = pygame.transform.scale(you_win_img,(you_win_img.get_width(),you_win_img.get_height()))
+game_over_img = pygame.image.load('gunner/img/gameover.png').convert_alpha()
+game_over_img = pygame.transform.scale(game_over_img,(game_over_img.get_width()*2,game_over_img.get_height()*2))
 # background 
 background_settings = pygame.image.load('gunner/img/Background/1.jpg').convert_alpha()
 background_settings = pygame.transform.scale(background_settings, (SCREEN_WIDTH,SCREEN_HEIGHT))
+control_setting_img = pygame.image.load("gunner/img/background/control_setting.jpg").convert_alpha()
+control_setting_img = pygame.transform.scale(control_setting_img, (SCREEN_WIDTH,SCREEN_HEIGHT))
+set_up_img = pygame.image.load("gunner/img/background/setting.jpg").convert_alpha()
+set_up_img = pygame.transform.scale(set_up_img, (SCREEN_WIDTH,SCREEN_HEIGHT))
 background_setup = pygame.image.load('gunner/img/Background/2.jpg').convert_alpha()
 background_setup = pygame.transform.scale(background_setup, (SCREEN_WIDTH,SCREEN_HEIGHT))
 diamon_display_img = pygame.image.load('gunner/img/diamon.png').convert_alpha()
@@ -87,10 +95,14 @@ sky_img = pygame.image.load('gunner/img/Background/sky_cloud.png').convert_alpha
 #button_img
 
 start_img = pygame.image.load("gunner/img//start_btn.png").convert_alpha()
-restart_img = pygame.image.load("gunner/img//restart_btn.png").convert_alpha()
+restart_img = pygame.image.load("gunner/img/restart.jpg").convert_alpha()
 resume_img = pygame.image.load("gunner/img/resume.jpg").convert_alpha()
 setting_img = pygame.image.load("gunner/img/setting.png").convert_alpha()
 menu_img = pygame.image.load("gunner/img/menu.jpg").convert_alpha()
+general_img = pygame.image.load("gunner/img/icons/general.png").convert_alpha()
+control_img = pygame.image.load("gunner/img/icons/control.png").convert_alpha()
+
+close_img = pygame.image.load("gunner/img/icons/close.png")
 # start_img = pygame.transform.scale(start_img,(300,100))
 # resume_img = pygame.transform.scale(resume_img,(182,79))
 # setting_img = pygame.transform.scale(setting_img,(182,79))
@@ -134,11 +146,9 @@ def draw_bg():
             screen.blit(mountain_img, ((x * width) - bg_scroll * 0.6, SCREEN_HEIGHT - mountain_img.get_height() - 300))
             screen.blit(pine1_img, ((x * width) - bg_scroll * 0.7, SCREEN_HEIGHT - pine1_img.get_height() - 150))
             screen.blit(pine2_img, ((x * width) - bg_scroll * 0.8, SCREEN_HEIGHT - pine2_img.get_height())) 
-def draw_charecter(text1,text2,font,text_col,x,y):
-    heart = font.render(text1,True,text_col)
-    diamon = font.render(text2,True,text_col)
+def draw_charecter(text,font,text_col,x,y):
+    diamon = font.render(text,True,text_col)
     screen.blit(heart_img,(0,0))
-    screen.blit(heart,(x+heart_img.get_width(),y))
     screen.blit(diamon_display_img,(0,heart_img.get_height()))
     screen.blit(diamon,(diamon_display_img.get_width()+x,heart_img.get_height()+y))
 def reset_level():
@@ -483,6 +493,13 @@ class Map():
         for tile in self.obstacle_lits:
             tile[1][0] +=screen_scroll
             screen.blit(tile[0],tile[1])
+class hearth_bar():
+    def __init__ (self,pos_x,pos_y):
+        self.pos_x = pos_x
+        self.pos_y = pos_y
+    def update(self):
+        pygame.draw.rect(screen, RED, pygame.Rect(self.pos_x, self.pos_y, 100,10))
+        pygame.draw.rect(screen, (0,255,0), pygame.Rect(self.pos_x,self.pos_y,100*(player1.health/player1.max_health),10))
 class Diamons(pygame.sprite.Sprite):
     def __init__(self,x,y,img):
         pygame.sprite.Sprite.__init__(self)
@@ -513,6 +530,57 @@ class Button():
                 self.clicked = False
         surface.blit(self.image,(self.rect.x,self.rect.y))
         return action
+class OptionBox():
+    def __init__(self, x, y, w, h, color, highlight_color, font, option_list, selected = 0):
+        self.color = color
+        self.highlight_color = highlight_color
+        self.rect = pygame.Rect(x, y, w, h)
+        self.font = font
+        self.option_list = option_list
+        self.selected = selected
+        self.draw_menu = False
+        self.menu_active = False
+        self.active_option = -1
+
+    def draw(self, surf):
+        pygame.draw.rect(surf, self.highlight_color if self.menu_active else self.color, self.rect)
+        pygame.draw.rect(surf, (0, 0, 0), self.rect, 2)
+        msg = self.font.render(self.option_list[self.selected], 1, (0, 0, 0))
+        surf.blit(msg, msg.get_rect(center = self.rect.center))
+
+        if self.draw_menu:
+            for i, text in enumerate(self.option_list):
+                rect = self.rect.copy()
+                rect.y += (i+1) * self.rect.height
+                pygame.draw.rect(surf, self.highlight_color if i == self.active_option else self.color, rect)
+                msg = self.font.render(text, 1, (0, 0, 0))
+                surf.blit(msg, msg.get_rect(center = rect.center))
+            outer_rect = (self.rect.x, self.rect.y + self.rect.height, self.rect.width, self.rect.height * len(self.option_list))
+            pygame.draw.rect(surf, (0, 0, 0), outer_rect, 2)
+
+    def update(self, event_list):
+        mpos = pygame.mouse.get_pos()
+        self.menu_active = self.rect.collidepoint(mpos)
+        
+        self.active_option = -1
+        for i in range(len(self.option_list)):
+            rect = self.rect.copy()
+            rect.y += (i+1) * self.rect.height
+            if rect.collidepoint(mpos):
+                self.active_option = i
+                break
+
+        if not self.menu_active and self.active_option == -1:
+            self.draw_menu = False
+
+        for event in event_list:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if self.menu_active:
+                    self.draw_menu = not self.draw_menu
+                elif self.draw_menu and self.active_option >= 0:
+                    self.selected = self.active_option
+                    self.draw_menu = False
+                    return self.active_option
 bullet_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
 items_box_group = pygame.sprite.Group()
@@ -523,11 +591,14 @@ diamon_group = pygame.sprite.Group()
 
 #create button
 start_btn = Button(start_img,20,SCREEN_HEIGHT-80,1)
-restart_btn = Button(restart_img,start_btn.rect.x+100,100,1)
+restart_btn = Button(restart_img,SCREEN_WIDTH//2-menu_img.get_width()//2,SCREEN_HEIGHT-300,1)
 exit_btn = Button(exit_img,SCREEN_WIDTH//2-88,SCREEN_HEIGHT//2,1)
 resume_btn = Button(resume_img,SCREEN_WIDTH//2-88,SCREEN_HEIGHT//2-160,1)
 setting_btn = Button(setting_img,SCREEN_WIDTH//2-88,SCREEN_HEIGHT//2-80,1)
 menu_btn = Button(menu_img,SCREEN_WIDTH//2-menu_img.get_width()//2,SCREEN_HEIGHT-150,1)
+close_btn = Button(close_img,SCREEN_WIDTH//2-106,SCREEN_HEIGHT-100,1)
+general_btn = Button(general_img,200,6,1)
+control_btn = Button (control_img,204+general_img.get_width(),6,1)
 # TAO BAN DO
 map_data = reset_level()
 with open(f"gunner/level{levels}_data.csv",newline='') as f:
@@ -539,9 +610,18 @@ new_map = Map()
 player1 =new_map.load_data(map_data)
 img_down = 0
 img_up = 150
+hearth = hearth_bar(30,8)
+list1 = OptionBox(
+    400, 270, 160, 40, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(None, 30), 
+    ["100%", "75%", "50%","25%","0%"])
+list2 = OptionBox(
+    400, 130, 160, 40, (150, 150, 150), (100, 200, 255), pygame.font.SysFont(None, 30), 
+    ["800x640","1280x720", "1920x1280"])
 while run:
+    event_list = pygame.event.get()
     if win_game==True:
         screen.fill((0,0,0))
+        snow_animation()
         if menu_btn.draw(screen):
             start_game=False
             win_game = False
@@ -557,14 +637,41 @@ while run:
         if set_up == True:
                 pygame.mixer.music.set_volume(0)
                 draw_bg()
+                selected_option = list1.update(event_list)
+                selected_option = list2.update(event_list)
                 if exit_btn.draw(screen):
                     run = False
                 if resume_btn.draw(screen):
                     set_up = False
                 if setting_btn.draw(screen):
-                    pass
+                    setting = True
+                if setting == True:
+                    screen.blit(set_up_img, (0,0))
+                    list2.draw(screen)
+                    list1.draw(screen)
+                    if close_btn.draw(screen):
+                        setting = False
+                    if general_btn.draw(screen):
+                        general_setting = True
+                        control_setting = False
+                    if control_btn.draw(screen):
+                        control_setting = True  
+                        general_setting = False
+                    if control_setting == True:
+                        screen.blit(control_setting_img,(0,0))
+                        if close_btn.draw(screen):
+                            setting = False
         else:
-            pygame.mixer.music.set_volume(0.3)
+            if list1.selected == 4:
+                pygame.mixer.music.set_volume(0)
+            if list1.selected == 3:
+                pygame.mixer.music.set_volume(0.3*0.25)
+            if list1.selected == 2:
+                pygame.mixer.music.set_volume(0.3*0.5)
+            if list1.selected == 1:
+                pygame.mixer.music.set_volume(0.3*0.75)
+            if list1.selected == 0:
+                pygame.mixer.music.set_volume(0.3)
             if start_game==False:
                 start_screen()
                 if start_btn.draw(screen):
@@ -572,11 +679,11 @@ while run:
                 # if exit_btn.draw(screen):
                 #     run = False
             else:
-                
                 draw_bg()
+                hearth.update()
                 snow_animation()
                 new_map.draw()
-                draw_charecter(f': {player1.health}',f': {player1.diamon}',font,WHITE,4,4)
+                draw_charecter(f': {player1.diamon}',font,WHITE,4,4)
                 player1.update()
                 player1.display()
                 for enemy in enemy_group:
@@ -638,22 +745,44 @@ while run:
                     # âm thanh người chơi chết chỉ phát 1 lần
                     if music ==0:
                         death_fx.play()
-                        music+=1
+                    music+=1
                     screen_scroll =0
-                    if restart_btn.draw(screen):
-                        bg_scroll =0
-                        map_data = reset_level()
-                        with open(f"gunner/level{levels}_data.csv",newline='') as f:
-                            reader = csv.reader(f,delimiter=',')
-                            for x,row in enumerate(reader):
-                                for y,tile in enumerate(row):
-                                    map_data[x][y] = int(tile)
-                        new_map = Map()
-                        player1 =new_map.load_data(map_data)
-                    if exit_btn.draw(screen):
-                        run =False
-
-    for event in pygame.event.get():
+                    if music >=100:
+                        music =100
+                        screen.fill((0,0,0))
+                        snow_animation()
+                        screen.blit(game_over_img,(SCREEN_WIDTH//2-game_over_img.get_width()//2,min(img_down,img_up)))
+                        if img_down <150:
+                            img_down+=1
+                        else:
+                            img_up-=1
+                        if img_up==0:
+                            img_down=0
+                            img_up=150
+                        if restart_btn.draw(screen):
+                            music = 0
+                            bg_scroll =0
+                            map_data = reset_level()
+                            with open(f"gunner/level{levels}_data.csv",newline='') as f:
+                                reader = csv.reader(f,delimiter=',')
+                                for x,row in enumerate(reader):
+                                    for y,tile in enumerate(row):
+                                        map_data[x][y] = int(tile)
+                            new_map = Map()
+                            player1 =new_map.load_data(map_data)
+                        if menu_btn.draw(screen):
+                            music = 0
+                            start_game=False
+                            bg_scroll =0
+                            map_data = reset_level()
+                            with open(f"gunner/level{levels}_data.csv",newline='') as f:
+                                reader = csv.reader(f,delimiter=',')
+                                for x,row in enumerate(reader):
+                                    for y,tile in enumerate(row):
+                                        map_data[x][y] = int(tile)
+                            new_map = Map()
+                            player1 =new_map.load_data(map_data)
+    for event in event_list:
         #quit game
         if event.type == pygame.QUIT:
             run = False
