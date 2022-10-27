@@ -1,4 +1,3 @@
-
 import random
 from pygame import mixer
 import pygame,sys
@@ -42,75 +41,75 @@ screen_scroll = 0
 bg_scroll = 0
 
 # music
-pygame.mixer.music.load('gunner/audio/Pubg.mp3')
+pygame.mixer.music.load('audio/Pubg.mp3')
 pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1,0.0,1000)
-jump_fx = pygame.mixer.Sound('gunner/audio/jump.wav')
+jump_fx = pygame.mixer.Sound('audio/jump.wav')
 jump_fx.set_volume(0.5)
-shoot_fx = pygame.mixer.Sound('gunner/audio/ak.wav')
+shoot_fx = pygame.mixer.Sound('audio/ak.wav')
 shoot_fx.set_volume(0.2)
-collect_fx = pygame.mixer.Sound('gunner/audio/collect.wav')
-death_fx = pygame.mixer.Sound('gunner/audio/die.wav')
-low_health_fx = pygame.mixer.Sound('gunner/audio/heart_injure.wav')
+collect_fx = pygame.mixer.Sound('audio/collect.wav')
+death_fx = pygame.mixer.Sound('audio/die.wav')
+low_health_fx = pygame.mixer.Sound('audio/heart_injure.wav')
 low_health_fx.set_volume(0.2)
 
 # map _ img
 img_list = []
 for x in range(TILE_TYPE):
-    img = pygame.image.load(f"gunner/img/tile/{x}.png").convert_alpha()
+    img = pygame.image.load(f"img/tile/{x}.png").convert_alpha()
     img = pygame.transform.scale(img,(TILE_SIZE,TILE_SIZE))
     img_list.append(img)
 
-player_img = pygame.image.load('gunner/img/tile/15.png')
+player_img = pygame.image.load('img/tile/15.png')
 player_img = pygame.transform.scale(player_img,(5*player_img.get_width(),5*player_img.get_height()))
 # bullet_img = pygame.transform.scale(bullet_img,(bullet_img.get_width()*2.5,bullet_img.get_height()*0.5))
-bullet_img = pygame.image.load('gunner/img/icons/bullet.png').convert_alpha()
+bullet_img = pygame.image.load('img/icons/bullet.png').convert_alpha()
 
 
 #pick up item
-health_box_img = pygame.image.load("gunner/img/icons/health_box.png").convert_alpha()
+health_box_img = pygame.image.load("img/icons/health_box.png").convert_alpha()
 items_box = {
     'Health' : health_box_img
 }
-you_win_img = pygame.image.load('gunner/img/win.png').convert_alpha()
+you_win_img = pygame.image.load('img/win.png').convert_alpha()
 # you_win_img = pygame.transform.scale(you_win_img,(you_win_img.get_width(),you_win_img.get_height()))
-game_over_img = pygame.image.load('gunner/img/gameover.png').convert_alpha()
+game_over_img = pygame.image.load('img/gameover.png').convert_alpha()
 game_over_img = pygame.transform.scale(game_over_img,(game_over_img.get_width()*2,game_over_img.get_height()*2))
 # background 
-background_settings = pygame.image.load('gunner/img/Background/1.jpg').convert_alpha()
+background_settings = pygame.image.load('img/Background/1.jpg').convert_alpha()
 background_settings = pygame.transform.scale(background_settings, (SCREEN_WIDTH,SCREEN_HEIGHT))
-control_setting_img = pygame.image.load("gunner/img/background/control_setting.jpg").convert_alpha()
+control_setting_img = pygame.image.load("img/background/control_setting.jpg").convert_alpha()
 control_setting_img = pygame.transform.scale(control_setting_img, (SCREEN_WIDTH,SCREEN_HEIGHT))
-set_up_img = pygame.image.load("gunner/img/background/setting.jpg").convert_alpha()
+set_up_img = pygame.image.load("img/background/setting.jpg").convert_alpha()
 set_up_img = pygame.transform.scale(set_up_img, (SCREEN_WIDTH,SCREEN_HEIGHT))
-background_setup = pygame.image.load('gunner/img/Background/2.jpg').convert_alpha()
+background_setup = pygame.image.load('img/Background/2.jpg').convert_alpha()
 background_setup = pygame.transform.scale(background_setup, (SCREEN_WIDTH,SCREEN_HEIGHT))
-diamon_display_img = pygame.image.load('gunner/img/diamon.png').convert_alpha()
-heart_img = pygame.image.load('gunner/img/icons/heart.png').convert_alpha()
-pine1_img = pygame.image.load('gunner/img/Background/pine1.png').convert_alpha()
-pine2_img = pygame.image.load('gunner/img/Background/pine2.png').convert_alpha()
-mountain_img = pygame.image.load('gunner/img/Background/mountain.png').convert_alpha()
-sky_img = pygame.image.load('gunner/img/Background/sky_cloud.png').convert_alpha() 
+diamon_display_img = pygame.image.load('img/diamon.png').convert_alpha()
+heart_img = pygame.image.load('img/icons/heart.png').convert_alpha()
+pine1_img = pygame.image.load('img/Background/pine1.png').convert_alpha()
+pine2_img = pygame.image.load('img/Background/pine2.png').convert_alpha()
+mountain_img = pygame.image.load('img/Background/mountain.png').convert_alpha()
+sky_img = pygame.image.load('img/Background/sky_cloud.png').convert_alpha() 
 
 #button_img
 
-start_img = pygame.image.load("gunner/img//start_btn.png").convert_alpha()
-restart_img = pygame.image.load("gunner/img/restart.jpg").convert_alpha()
-resume_img = pygame.image.load("gunner/img/resume.jpg").convert_alpha()
-setting_img = pygame.image.load("gunner/img/setting.png").convert_alpha()
-menu_img = pygame.image.load("gunner/img/menu.jpg").convert_alpha()
-general_img = pygame.image.load("gunner/img/icons/general.png").convert_alpha()
-control_img = pygame.image.load("gunner/img/icons/control.png").convert_alpha()
+start_img = pygame.image.load("img//start_btn.png").convert_alpha()
+restart_img = pygame.image.load("img/restart.jpg").convert_alpha()
+resume_img = pygame.image.load("img/resume.jpg").convert_alpha()
+setting_img = pygame.image.load("img/setting.png").convert_alpha()
+menu_img = pygame.image.load("img/menu.jpg").convert_alpha()
+general_img = pygame.image.load("img/icons/general.png").convert_alpha()
+control_img = pygame.image.load("img/icons/control.png").convert_alpha()
 
-close_img = pygame.image.load("gunner/img/icons/close.png")
+close_img = pygame.image.load("img/icons/close.png")
 # start_img = pygame.transform.scale(start_img,(300,100))
 # resume_img = pygame.transform.scale(resume_img,(182,79))
 # setting_img = pygame.transform.scale(setting_img,(182,79))
-# game_over_img = pygame.image.load("gunner/img/game_over.png").convert_alpha()
-exit_img = pygame.image.load("gunner/img/exit.png").convert_alpha()
+# game_over_img = pygame.image.load("img/game_over.png").convert_alpha()
+exit_img = pygame.image.load("img/exit.png").convert_alpha()
 # exit_img = pygame.transform.scale(exit_img,(300,100))
 # hinh map
-trungbui = pygame.image.load('gunner/img/background/map.jpg')
+trungbui = pygame.image.load('img/background/map.jpg')
 trungbui = pygame.transform.scale(trungbui,(start_img.get_width(),trungbui.get_height()))
 
 BG = (144, 201, 120)
@@ -206,9 +205,9 @@ class Soldier(pygame.sprite.Sprite):
 			#reset temporary list of images
             temp_list = []
 			#count number of files in the folder
-            num_of_frames = len(os.listdir(f'gunner/img/{self.type}/{animation}'))
+            num_of_frames = len(os.listdir(f'img/{self.type}/{animation}'))
             for i in range(0,num_of_frames):
-                img = pygame.image.load(f'gunner/img/{self.type}/{animation}/{i}.png').convert_alpha()
+                img = pygame.image.load(f'img/{self.type}/{animation}/{i}.png').convert_alpha()
                 img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
                 temp_list.append(img)
             self.animation_list.append(temp_list)
@@ -601,7 +600,7 @@ general_btn = Button(general_img,200,6,1)
 control_btn = Button (control_img,204+general_img.get_width(),6,1)
 # TAO BAN DO
 map_data = reset_level()
-with open(f"gunner/level{levels}_data.csv",newline='') as f:
+with open(f"level{levels}_data.csv",newline='') as f:
                     reader = csv.reader(f,delimiter=',')
                     for x,row in enumerate(reader):
                         for y,tile in enumerate(row):
@@ -620,6 +619,7 @@ list2 = OptionBox(
 while run:
     event_list = pygame.event.get()
     if win_game==True:
+        # screen.fill('sky blue')
         screen.fill((0,0,0))
         snow_animation()
         if menu_btn.draw(screen):
@@ -721,7 +721,7 @@ while run:
                         if levels<=MAX_LEVEL:
                             bg_scroll =0
                             map_data = reset_level()
-                            with open(f"gunner/level{levels}_data.csv",newline='') as f:
+                            with open(f"level{levels}_data.csv",newline='') as f:
                                 reader = csv.reader(f,delimiter=',')
                                 for x,row in enumerate(reader):
                                     for y,tile in enumerate(row):
@@ -734,7 +734,7 @@ while run:
                             levels = 1
                             bg_scroll =0
                             map_data = reset_level()
-                            with open(f"gunner/level{levels}_data.csv",newline='') as f:
+                            with open(f"level{levels}_data.csv",newline='') as f:
                                 reader = csv.reader(f,delimiter=',')
                                 for x,row in enumerate(reader):
                                     for y,tile in enumerate(row):
@@ -763,7 +763,7 @@ while run:
                             music = 0
                             bg_scroll =0
                             map_data = reset_level()
-                            with open(f"gunner/level{levels}_data.csv",newline='') as f:
+                            with open(f"level{levels}_data.csv",newline='') as f:
                                 reader = csv.reader(f,delimiter=',')
                                 for x,row in enumerate(reader):
                                     for y,tile in enumerate(row):
@@ -775,7 +775,7 @@ while run:
                             start_game=False
                             bg_scroll =0
                             map_data = reset_level()
-                            with open(f"gunner/level{levels}_data.csv",newline='') as f:
+                            with open(f"level{levels}_data.csv",newline='') as f:
                                 reader = csv.reader(f,delimiter=',')
                                 for x,row in enumerate(reader):
                                     for y,tile in enumerate(row):
@@ -795,25 +795,29 @@ while run:
                 # di sang phai
             if event.key == pygame.K_d:
                 move_right = True
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_w:
                 player1.jump = True
                 jump_fx.play()
             if event.key == pygame.K_ESCAPE:
                 # run = False
                 set_up = True
+            if event.key ==pygame.K_SPACE:
+                shoot = True
         if event.type ==pygame.KEYUP:
             if event.key == pygame.K_a:
                 move_left = False
             if event.key == pygame.K_d:
                 move_right = False
-            if event.key ==pygame.K_SPACE:
+            if event.key ==pygame.K_w:
                 player1.jump = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button ==1:
-                shoot = True
-        if event.type == pygame.MOUSEBUTTONUP:
-            if event.button ==1:
+            if event.key ==pygame.K_SPACE:
                 shoot = False
+        # if event.type == pygame.MOUSEBUTTONDOWN:
+        #     if event.button ==1:
+        #         shoot = True
+        # if event.type == pygame.MOUSEBUTTONUP:
+        #     if event.button ==1:
+        #         shoot = False
     clock.tick(60)
     pygame.display.update()      
 pygame.quit()
